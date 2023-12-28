@@ -19,7 +19,7 @@ public class S3Config {
   private final AwsProperties properties;
   private final MiniIoProperties ioProperties;
 
-  @Bean("awsClient")
+  @Bean
   public S3Client awsClient() {
     return S3Client.builder()
         .region(Region.of(properties.getRegion()))
