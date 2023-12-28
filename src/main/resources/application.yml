@@ -1,0 +1,91 @@
+server:
+  port: 8080
+picpay:
+  service:
+    name: ${spring.application.name}
+  logging:
+    level: ${PICPAY_TEMPLATE_LOGGING_LEVEL:INFO}
+    appender: ${PICPAY_TEMPLATE_LOGGING_APPENDER:CONSOLE}
+
+info:
+  app:
+    name: @project.name@
+    description: @project.description@
+    version: @project.version@
+
+spring:
+  application:
+    name: ms-picpaybank-regulatory-accounting-gateway-java
+  main:
+    banner-mode: "off"
+  jpa:
+    open-in-view: false
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${PICPAY_PICPAYBANK_CONTABIL_MYSQL_LOGIN}
+    password: ${PICPAY_PICPAYBANK_CONTABIL_MYSQL_PASSWORD}
+    url: jdbc:mysql://${PICPAY_PICPAYBANK_CONTABIL_MYSQL_HOST}:${PICPAY_PICPAYBANK_CONTABIL_MYSQL_PORT}/${PICPAY_PICPAYBANK_CONTABIL_MYSQL_DB}
+    tomcat:
+      test-on-borrow: true
+      validation-query: SELECT 1
+      validation-interval: 5000
+    continue-on-error: true
+    hikari:
+      connection-timeout: 30000
+      minimum-idle: 5
+      maximum-pool-size: 50
+      idle-timeout: 120000
+      max-lifetime: 28800000
+      pool-name: ${spring.application.name}
+  sql:
+    init:
+      platform: org.hibernate.dialect.MySQL5InnoDBDialect
+  cloud:
+    config:
+      server:
+        aws3:
+          storageName: ${PICPAYBANK_ACCOUNTING_GATEWAY_S3_STORAGE_NAME}
+          region: ${PICPAY_PICPAYBANK_CONTABIL_S3_REGION}
+          bucket: ${PICPAY_PICPAYBANK_CONTABIL_S3_BUCKET}
+          endpoint: ${PICPAY_PICPAYBANK_CONTABIL_S3_HOST}
+          accessKey: ${PICPAY_PICPAYBANK_CONTABIL_S3_ACCESS_KEY}
+          secretKey: ${PICPAY_PICPAYBANK_CONTABIL_S3_SECRET_KEY}
+
+management:
+  endpoint:
+    health:
+      show-details: always
+      group.liveness.include: livenessProbe,db
+  health:
+    probes.enabled: true
+    binders.enabled: false
+    diskspace.enabled: false
+  endpoints:
+    web:
+      base-path: '/'
+      exposure:
+        include: health
+
+springdoc:
+  api-docs:
+    resolve-schema-properties: true
+    path: /api-docs
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /swagger-ui.html
+  override-with-generic-response: false
+  paths-to-exclude: /**/api-docs,/swagger-resources/**
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %X{X-Request-ID} %highlight(%-5level) %magenta([%t]) %msg%n"
+
+miniio:
+  bucket:
+    host: ${PICPAYBANK_REGULATORY_S3_HOST}
+    accessKey: ${PICPAYBANK_REGULATORY_S3_ACCESS_KEY}
+    secretKey: ${PICPAYBANK_REGULATORY_S3_SECRET_KEY}
+    region: ${PICPAYBANK_REGULATORY_S3_REGION}
+    bucketName: ${PICPAYBANK_ACCOUNTING_GATEWAY_S3_STORAGE_NAME}
